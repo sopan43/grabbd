@@ -55,5 +55,35 @@ router.post('/register', function(req, res) {
     }
 }); //account/register
 
+/**********************************************************************************************************
+ *                                                                                                        *
+ *                                       POST LOGIN  User                                                 *
+ *                                                                                                        *
+ **********************************************************************************************************/
+router.post('/login', function(req, res) {
+
+    var email = req.body.email;
+    var password = req.body.password;
+    var userCategory = [];
+    if (!email || !password) {
+        return res.json({ success: 0, message: 'mandatory paramentes missing' });
+    } else {
+        conn.query('SELECT * FROM user WHERE user_email = ?', [email], (error, row) => {
+            if (error) {
+                return res.json({ success: 0, message: 'Error in query ' + error });
+            } else {
+                if (row.length !== 1) {
+                    return res.json({ success: 0, message: 'No user found' });
+                } else if (md5(password) == row[0].user_password) {
+                    return res.json({ success: 1, message: 'Login Successfully ', user: row });
+                } else if (md5(password) != row[0].user_password) {
+                    return res.json({ success: 0, message: 'Wrong password' });
+                } else {
+                    return res.json({ success: 0, message: 'Unexpeted Error' });
+                }
+            }
+        });
+    }
+}); //account/login
 
 module.exports = router;
