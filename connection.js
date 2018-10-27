@@ -1,13 +1,9 @@
 var mysql = require('mysql');
 var connection = mysql.createConnection({
-    // host: 'us-cdbr-iron-east-05.cleardb.net',
-    // user: 'bedbc9cc7d11fa',
-    // password: '0a93b38cd911cfa',
-    // database: 'heroku_1141cf6ca7b533b'
-    user: 'root',
-    password: 'root',
-    database: 'grabbd',
-    host: "127.0.0.1"
+    user: process.env.GRABBD_DB_USER,
+    password: process.env.GRABBD_DB_PASSWORD,
+    database: process.env.GRABBD_DB,
+    host: process.env.GRABBD_DB_HOST
 
 });
 
