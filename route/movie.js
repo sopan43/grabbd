@@ -8,14 +8,15 @@ var conn = require('../connection.js')
 
 router.get('/:id', (req, res) => {
     var id = req.params.id;
-    console.log(id);
-    if (!isNaN(id)) {
+    var option = req.query.option;
+    console.log(req.query.option);
+    if (!isNaN(id) && !option) {
         var options = {
             method: 'GET',
             url: 'https://api.themoviedb.org/3/movie/' + id,
             qs: {
                 language: 'en-US',
-                api_key: 'TMDB_API_KEY'
+                api_key: '9f8e7e23d883edcb80bf34c7c3f2bbde'
             },
             body: '{}'
         };
@@ -25,8 +26,40 @@ router.get('/:id', (req, res) => {
 
             return res.json({ success: 1, message: 'successfully', data: JSON.parse(body) });
         });
-    } else {
+    } else if (!isNaN(id) && (option === 'like' || option === 'dislike')) {
+        var choice = {
+            user_id: req.session.user_id,
+            movie_id: req.params.id,
+            user_choice: req.query.option
+        };
+        conn.query('SELECT * FROM choice WHERE user_id = ? AND movie_id = ?', [choice.user_id, choice.movie_id], (error, rows) => {
+            if (error) {
+                return res.json({ success: 0, message: 'Error in query ' + error });
+            } else if (rows.length === 0) {
+                conn.query('INSERT INTO choice SET ?', [choice], (error, result) => {
+                    if (error) {
+                        console.log('error in query ' + error);
+                        return res.json({ success: 0, message: "Error in query " + error });
+                    }
+                });
+            } else if (rows.length > 0 && rows[0].user_choice !== choice.user_choice) {
+                conn.query('UPDATE choice SET user_choice = ? WHERE  user_id = ? AND movie_id = ?', [choice.user_choice, choice.user_id, choice.movie_id], (error, result) => {
+                    if (error) {
+                        console.log('error in query ' + error);
+                        return res.json({ success: 0, message: "Error in query " + error });
+                    }
+                });
+            } else if (rows.length > 0 && rows[0].user_choice === choice.user_choice) {
+                conn.query('DELETE FROM choice  WHERE  user_id = ? AND movie_id = ?', [choice.user_id, choice.movie_id], (error, result) => {
+                    if (error) {
+                        console.log('error in query ' + error);
+                        return res.json({ success: 0, message: "Error in query " + error });
+                    }
+                });
+            }
 
+        });
+        return res.json({ success: 1, message: 'successfully' });
     }
 
 });
@@ -51,11 +84,10 @@ router.get('/', (req, res) => {
         request(options, function(error, response, body) {
             if (error) throw new Error(error);
 
-            console.log(body);
             return res.json({ success: 1, message: 'successfully', data: JSON.parse(body) });
         });
-    } else{
-    	
+    } else {
+
     }
 });
 
