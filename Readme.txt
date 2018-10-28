@@ -4,6 +4,7 @@ email   : sopanmittal43@gmail.com
 
 url (Digital Ocean): http://142.93.223.14:3000
 url (local path): http://127.0.0.1
+NOTE for local: downlod the repo, do in the folder and run "npm install" (internt required) and create the databse and run the commands in "grabbd.sql" file then in cmd run "npm start"
 
 
 1)url/user/signup (should be send as form data)
