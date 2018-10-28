@@ -3,45 +3,23 @@ const router = express.Router();
 const validator = require("email-validator");
 const md5 = require('md5');
 const session = require('express-session');
-const multer = require('multer');
+const bodyParser = require("body-parser");
 
 const middleware = require('../middleware/logincheck');
 const conn = require('../connection.js')
-
-const storage = multer.diskStorage({
-    destination: function(req, file, cb) {
-        cb(null, './uploads')
-    },
-    filename: function(req, file, cb) {
-        cb(null, 'grabbd_user_image' + Date.now() + file.originalname);
-
-    }
-});
-const upload = multer({ storage: storage });
-
-const cpUpload = upload.fields([{ name: 'profilepic', maxCount: 1 }]);
-
-
 /**********************************************************************************************************
  *                                                                                                        *
  *                                       POST Register User                                               *
  *                                                                                                        *
  **********************************************************************************************************/
-router.post('/register', cpUpload, function(req, res) {
+router.post('/register', function(req, res) {
 
-    var email = req.body.email.trim();
+    var email = (req.body.email === undefined) ? "" : req.body.email.trim();
     var firstname = (req.body.firstname === undefined) ? "" : req.body.firstname.trim();
     var lastname = (req.body.lastname === undefined) ? "" : req.body.lastname.trim();
     var gender = (req.body.gender === undefined) ? "" : req.body.gender.trim();
     var dob = (req.body.dob === undefined) ? "" : req.body.dob.trim();
     var password = (req.body.password === undefined) ? "" : req.body.password.trim();
-
-    var profilepic;
-    if (req.files.profilepic) {
-        profilepic = req.files.profilepic[0].filename;
-    } else {
-        profilepic = '';
-    }
 
     var hashedPassword;
     if (password) {
@@ -53,8 +31,7 @@ router.post('/register', cpUpload, function(req, res) {
         user_lastname: lastname,
         user_gender: gender,
         user_dob: dob,
-        user_password: hashedPassword,
-        user_profil_pic: profilepic
+        user_password: hashedPassword
     };
 
     if (!email || !password || !validator.validate(email.trim())) {
@@ -62,17 +39,18 @@ router.post('/register', cpUpload, function(req, res) {
     } else {
         conn.query('SELECT user_email FROM user WHERE user_email = ?', [email.trim()], (error, rows) => {
             if (error) {
-                return res.json({ success: 0, message: 'Error in query ' + error });
+                res.status(400);
+                return res.json(error);
             }
             if (rows.length > 0) {
-                return res.json({ success: 0, message: "User Allready Exixt" });
+                return res.json("User Allready Exixt");
             } else {
                 conn.query('INSERT INTO user SET ?', [user_account], (error, result) => {
                     if (error) {
-                        console.log('error in query ' + error);
-                        return res.json({ success: 0, message: "Error in query " + error });
+                        res.status(400);
+                        return res.json(error);
                     }
-                    return res.json({ success: 1, message: "User Registered  " });
+                    return res.json("User Registered  ");
                 });
             }
         });
@@ -86,8 +64,8 @@ router.post('/register', cpUpload, function(req, res) {
  **********************************************************************************************************/
 router.post('/login', function(req, res) {
 
-    var email = req.body.email.trim();
-    var password = req.body.password.trim();
+    var email = (req.body.email === undefined) ? "" : req.body.email.trim();
+    var password = (req.body.password === undefined) ? "" : req.body.password.trim();
 
 
     if (req.session.user_login === undefined) {
@@ -98,6 +76,7 @@ router.post('/login', function(req, res) {
                 res.status(400);
                 rej('Unexpeted Error');
             } else {
+
                 conn.query('SELECT * FROM user WHERE user_email = ?', [email], (error, row) => {
                     if (error) {
                         res.status(400);
@@ -126,7 +105,7 @@ router.post('/login', function(req, res) {
             return res.status(200).json('User Login Successfully');
 
         }, function(error) {
-            return res.send(error);
+            return res.json(error);
         });
     } else {
         return res.json('User Already logedin');
@@ -139,10 +118,10 @@ router.post('/login', function(req, res) {
  **********************************************************************************************************/
 router.get('/logout', middleware.isLoggedIn, function(req, res) {
     if (!req.session.user_login) {
-        return res.status(401).send();
+        return res.status(401).JSON('Unexpeted Error');
     } else {
         req.session.destroy();
-        return res.status(200).send();
+        return res.status(200).JSON('User logout Successfully');
     }
 });
 /**********************************************************************************************************

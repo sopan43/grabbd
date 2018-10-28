@@ -10,14 +10,14 @@ const conn = require('../connection.js')
 router.get('/:id', middleware.isLoggedIn, (req, res) => {
     var id = req.params.id;
     var option = req.query.option;
-    console.log(req.query.option);
+    console.log(option);
     if (!isNaN(id) && !option) {
         var options = {
             method: 'GET',
             url: 'https://api.themoviedb.org/3/movie/' + id,
             qs: {
                 language: 'en-US',
-                api_key: process.env.TMDB_API_KEY
+                api_key: '9f8e7e23d883edcb80bf34c7c3f2bbde'
             },
             body: '{}'
         };
@@ -25,7 +25,7 @@ router.get('/:id', middleware.isLoggedIn, (req, res) => {
         request(options, function(error, response, body) {
             if (error) throw new Error(error);
 
-            return res.json({ success: 1, message: 'successfully', data: JSON.parse(body) });
+            return res.json(JSON.parse(body));
         });
     } else if (!isNaN(id) && (option === 'like' || option === 'dislike')) {
         var choice = {
@@ -40,7 +40,7 @@ router.get('/:id', middleware.isLoggedIn, (req, res) => {
                 conn.query('INSERT INTO choice SET ?', [choice], (error, result) => {
                     if (error) {
                         console.log('error in query ' + error);
-                        return res.json({ success: 0, message: "Error in query " + error });
+                        return res.json(error);
                     }
                 });
             } else if (rows.length > 0 && rows[0].user_choice !== choice.user_choice) {
@@ -76,7 +76,7 @@ router.get('/', middleware.isLoggedIn,(req, res) => {
                 page: '1',
                 query: query,
                 language: 'en-US',
-                api_key: process.env.TMDB_API_KEY
+                api_key: '9f8e7e23d883edcb80bf34c7c3f2bbde'
             },
             body: '{}'
         };
@@ -84,7 +84,7 @@ router.get('/', middleware.isLoggedIn,(req, res) => {
         request(options, function(error, response, body) {
             if (error) throw new Error(error);
 
-            return res.json({ success: 1, message: 'successfully', data: JSON.parse(body) });
+            return res.json(JSON.parse(body));
         });
     } else {
 

@@ -7,7 +7,7 @@ const index = require('./route/index.js');
 const movie = require('./route/movie.js');
 
 const port = process.env.PORT || 3000;
-
+console.log("Sopan Mittal")
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
