@@ -157,13 +157,13 @@ router.get('/profile', middleware.isLoggedIn, function(req, res) {
             if (error) {
                 rrej(error);
             } else {
-                conn.query('SELECT COUNT(*) as likecount FROM choice as c JOIN user as u WHERE c.user_id = ? AND user_choice = "like"', [req.session.user_id], (error, likecount) => {
+                conn.query('SELECT COUNT(*) as likecount FROM choice WHERE user_id = ? AND user_choice = "like"', [req.session.user_id], (error, likecount) => {
                     if (error) {
                         rej(error);
                     }
                     rows[0].likecount = likecount[0].likecount;
                 });
-                conn.query('SELECT COUNT(*) as dislikecount FROM choice as c JOIN user as u WHERE c.user_id = ? AND user_choice = "dislike"', [req.session.user_id], (error, dislikecount) => {
+                conn.query('SELECT COUNT(*) as dislikecount FROM choice WHERE user_id = ? AND user_choice = "dislike"', [req.session.user_id], (error, dislikecount) => {
                     if (error) {
                         rej(error);
                     }
