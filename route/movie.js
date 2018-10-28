@@ -4,7 +4,8 @@ const validator = require("email-validator");
 const request = require("request");
 const querystring = require("querystring");
 
-var conn = require('../connection.js')
+const middleware = require('../middleware/logincheck');
+const conn = require('../connection.js')
 
 router.get('/:id', (req, res) => {
     var id = req.params.id;

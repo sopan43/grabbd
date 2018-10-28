@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const validator = require("email-validator");
-const conn = require('../connection.js')
 const md5 = require('md5');
 const session = require('express-session');
 const multer = require('multer');
+
+const middleware = require('../middleware/logincheck');
+const conn = require('../connection.js')
 
 const storage = multer.diskStorage({
     destination: function(req, file, cb) {
@@ -135,7 +137,7 @@ router.post('/login', function(req, res) {
  *                                       GET LOGOUT  User                                                 *
  *                                                                                                        *
  **********************************************************************************************************/
-router.get('/logout', function(req, res) {
+router.get('/logout', middleware.isLoggedIn, function(req, res) {
     if (!req.session.user_login) {
         return res.status(401).send();
     } else {
@@ -148,7 +150,7 @@ router.get('/logout', function(req, res) {
  *                                       GET User Profile                                                 *
  *                                                                                                        *
  **********************************************************************************************************/
-router.get('/profile', function(req, res) {
+router.get('/profile', middleware.isLoggedIn, function(req, res) {
 
     return new Promise(function(resolve, rej) {
         conn.query('SELECT * FROM user WHERE user_id = ?', [req.session.user_id], (error, rows) => {
