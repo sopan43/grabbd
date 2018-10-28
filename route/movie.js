@@ -7,7 +7,7 @@ const querystring = require("querystring");
 const middleware = require('../middleware/logincheck');
 const conn = require('../connection.js')
 
-router.get('/:id', (req, res) => {
+router.get('/:id', middleware.isLoggedIn, (req, res) => {
     var id = req.params.id;
     var option = req.query.option;
     console.log(req.query.option);
@@ -65,7 +65,7 @@ router.get('/:id', (req, res) => {
 
 });
 
-router.get('/', (req, res) => {
+router.get('/', middleware.isLoggedIn,(req, res) => {
     var query = req.query.query;
     if (isNaN(query)) {
         var options = {
