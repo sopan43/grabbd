@@ -10,7 +10,7 @@ const conn = require('../connection.js')
 
 const storage = multer.diskStorage({
     destination: function(req, file, cb) {
-        cb(null, '../uploads')
+        cb(null, './uploads')
     },
     filename: function(req, file, cb) {
         cb(null, 'grabbd_user_image' + Date.now() + file.originalname);
@@ -37,7 +37,7 @@ router.post('/register', cpUpload, function(req, res) {
     var password = (req.body.password === undefined) ? "" : req.body.password.trim();
 
     var profilepic;
-    if (req.files.profilepic) {
+    if (req.files) {
         profilepic = req.files.profilepic[0].filename;
     } else {
         profilepic = '';
