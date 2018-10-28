@@ -37,7 +37,7 @@ router.post('/register', cpUpload, function(req, res) {
     var password = (req.body.password === undefined) ? "" : req.body.password.trim();
 
     var profilepic;
-    if (req.files) {
+    if (req.files.profilepic) {
         profilepic = req.files.profilepic[0].filename;
     } else {
         profilepic = '';
