@@ -16,7 +16,7 @@ router.get('/:id', (req, res) => {
             url: 'https://api.themoviedb.org/3/movie/' + id,
             qs: {
                 language: 'en-US',
-                api_key: 'TMDB_API_KEY'
+                api_key: process.env.TMDB_API_KEY
             },
             body: '{}'
         };
@@ -75,7 +75,7 @@ router.get('/', (req, res) => {
                 page: '1',
                 query: query,
                 language: 'en-US',
-                api_key: 'TMDB_API_KEY'
+                api_key: process.env.TMDB_API_KEY
             },
             body: '{}'
         };

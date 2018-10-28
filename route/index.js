@@ -25,7 +25,7 @@ const cpUpload = upload.fields([{ name: 'profilepic', maxCount: 1 }]);
  *                                       POST Register User                                               *
  *                                                                                                        *
  **********************************************************************************************************/
-router.post('/register', cpUpload,function(req, res) {
+router.post('/register', cpUpload, function(req, res) {
 
     var email = req.body.email.trim();
     var firstname = (req.body.firstname === undefined) ? "" : req.body.firstname.trim();
@@ -65,7 +65,7 @@ router.post('/register', cpUpload,function(req, res) {
             if (rows.length > 0) {
                 return res.json({ success: 0, message: "User Allready Exixt" });
             } else {
-                 conn.query('INSERT INTO user SET ?', [user_account], (error, result) => {
+                conn.query('INSERT INTO user SET ?', [user_account], (error, result) => {
                     if (error) {
                         console.log('error in query ' + error);
                         return res.json({ success: 0, message: "Error in query " + error });
@@ -117,7 +117,6 @@ router.post('/login', function(req, res) {
                 });
             }
         }).then(function(data) {
-            console.log(data);
             req.session.user_login = true;
             req.session.user_id = data.user_id;
             req.session.user_email = data.user_email;
@@ -143,6 +142,42 @@ router.get('/logout', function(req, res) {
         req.session.destroy();
         return res.status(200).send();
     }
+});
+/**********************************************************************************************************
+ *                                                                                                        *
+ *                                       GET User Profile                                                 *
+ *                                                                                                        *
+ **********************************************************************************************************/
+router.get('/profile', function(req, res) {
+
+    return new Promise(function(resolve, rej) {
+        conn.query('SELECT * FROM user WHERE user_id = ?', [req.session.user_id], (error, rows) => {
+            if (error) {
+                rrej(error);
+            } else {
+                conn.query('SELECT COUNT(*) as likecount FROM choice as c JOIN user as u WHERE c.user_id = ? AND user_choice = "like"', [req.session.user_id], (error, likecount) => {
+                    if (error) {
+                        rej(error);
+                    }
+                    rows[0].likecount = likecount[0].likecount;
+                });
+                conn.query('SELECT COUNT(*) as dislikecount FROM choice as c JOIN user as u WHERE c.user_id = ? AND user_choice = "dislike"', [req.session.user_id], (error, dislikecount) => {
+                    if (error) {
+                        rej(error);
+                    }
+                    rows[0].dislikecount = dislikecount[0].dislikecount;
+                    resolve(rows[0])
+                });
+            };
+        });
+    }).then(function(data) {
+
+        return res.status(200).json(data);
+
+    }, function(error) {
+        return res.send(error);
+    });
+
 });
 
 module.exports = router;
